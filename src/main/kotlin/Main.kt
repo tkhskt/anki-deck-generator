@@ -1,5 +1,9 @@
-package org.example
+package com.tkhskt.ankideckgenerator
 
-fun main() {
-    println("Hello World!")
+suspend fun main() {
+    val dictionary = Dictionary("dictionary/eijiro.txt")
+    val entry = dictionary.find("first", Dictionary.PartOfSpeech.ADVERB)
+    entry.forEach {
+        println(it)
+    }
 }
