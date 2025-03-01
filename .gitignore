@@ -43,4 +43,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-dictionary/
+**/resources/dictionary
+out/

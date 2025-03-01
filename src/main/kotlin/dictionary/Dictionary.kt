@@ -1,0 +1,32 @@
+package com.tkhskt.ankideckgenerator.dictionary
+
+interface Dictionary {
+
+    suspend fun find(keyword: String, partOfSpeech: PartOfSpeech? = null): List<Entry>
+
+    data class Entry(
+        val word: String,
+        val partOfSpeech: String?,
+        val definition: String,
+        val exampleSentence: ExampleSentence?,
+    ) {
+        data class ExampleSentence(
+            val en: String,
+            val ja: String,
+        )
+    }
+
+    enum class PartOfSpeech(val value: String) {
+        NOUN("名"),
+        VERB("動"),
+        ADJECTIVE("形"),
+        ADVERB("副"),
+        AUXILIARY("助"),
+    }
+
+    companion object {
+        fun eijiro(filePath: String): Dictionary {
+            return Eijiro(filePath)
+        }
+    }
+}

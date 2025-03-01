@@ -1,15 +1,17 @@
-package com.tkhskt.ankideckgenerator
+package com.tkhskt.ankideckgenerator.dictionary
 
+import com.tkhskt.ankideckgenerator.dictionary.Dictionary.Entry
+import com.tkhskt.ankideckgenerator.dictionary.Dictionary.PartOfSpeech
 import java.io.InputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class Dictionary(
+class Eijiro(
     private val filePath: String,
-) {
+) : Dictionary {
 
-    suspend fun find(keyword: String, partOfSpeech: PartOfSpeech? = null): List<Entry> {
+    override suspend fun find(keyword: String, partOfSpeech: PartOfSpeech?): List<Entry> {
         val entries = findEntries(keyword).mergeEntries()
         return entries.filterPartOfSpeech(partOfSpeech)
     }
@@ -47,8 +49,12 @@ class Dictionary(
         return grouped.mapNotNull { (key, groupedEntries) ->
             Entry(
                 word = groupedEntries.first().word, // 先頭の `word` を採用
-                partOfSpeech = key, // `{}` で括って漢字部分のみ
-                definition = groupedEntries.joinToString("") { it.definition },
+                partOfSpeech = "【${key}】", // `{}` で括って漢字部分のみ
+                definition = groupedEntries.mapIndexed { index, value ->
+                    value.copy(
+                        definition = "${index + 1}. ${value.definition}"
+                    )
+                }.joinToString("\n") { it.definition },
                 exampleSentence = groupedEntries.firstOrNull { it.exampleSentence != null }?.exampleSentence
             )
         }
@@ -97,25 +103,5 @@ class Dictionary(
             en = matchResult.groupValues[1].trim(),
             ja = matchResult.groupValues[2].trim()
         )
-    }
-
-    data class Entry(
-        val word: String,
-        val partOfSpeech: String?,
-        val definition: String,
-        val exampleSentence: ExampleSentence?,
-    ) {
-        data class ExampleSentence(
-            val en: String,
-            val ja: String,
-        )
-    }
-
-    enum class PartOfSpeech(val value: String) {
-        NOUN("名"),
-        VERB("動"),
-        ADJECTIVE("形"),
-        ADVERB("副"),
-        AUXILIARY("助"),
     }
 }
