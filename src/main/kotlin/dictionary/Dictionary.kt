@@ -22,6 +22,13 @@ interface Dictionary {
         ADJECTIVE("形"),
         ADVERB("副"),
         AUXILIARY("助"),
+        ;
+
+        companion object {
+            fun find(value: String): PartOfSpeech? {
+                return entries.find { it.value == value }
+            }
+        }
     }
 
     companion object {

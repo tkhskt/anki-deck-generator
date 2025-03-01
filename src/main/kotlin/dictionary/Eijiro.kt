@@ -31,7 +31,7 @@ class Eijiro(
         if (entries.isNotEmpty()) {
             cont.resume(entries.toList())
         } else {
-            cont.resumeWithException(Exception())
+            cont.resumeWithException(Exception("$keyword not found"))
         }
     }
 
