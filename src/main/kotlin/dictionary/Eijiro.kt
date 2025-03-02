@@ -32,7 +32,10 @@ class Eijiro(
         if (entries.isEmpty()) {
             throw Exception("${query.keyword} not found")
         }
-        return entries.mergeSameWordEntries()
+
+        return entries.mergeSameWordEntries(
+            pronunciation = extractPronunciation(entries)
+        ).filterNotPronunciationEntry()
     }
 
     override fun findAll(queries: List<Dictionary.Query>): List<Entry> {
@@ -46,8 +49,10 @@ class Eijiro(
             }
         }
         return entriesMap.map { (_, entries) ->
-            entries.mergeSameWordEntries()
-        }.flatten()
+            entries.mergeSameWordEntries(
+                pronunciation = extractPronunciation(entries)
+            )
+        }.flatten().filterNotPronunciationEntry()
     }
 
     private fun openFile(): InputStream? {
@@ -78,14 +83,14 @@ class Eijiro(
     }
 
     private fun isTargetEntry(entry: Entry, query: Dictionary.Query): Boolean {
-        val isMatchingWord = entry.word == query.keyword && entry.definition.contains("【＠】").not()
+        val isMatchingWord = entry.word == query.keyword
         val isMatchingPartOfSpeech = query.partOfSpeech?.let {
             entry.partOfSpeech?.contains(it.value) ?: true
         } ?: true
         return isMatchingWord && isMatchingPartOfSpeech
     }
 
-    private fun List<Entry>.mergeSameWordEntries(): List<Entry> {
+    private fun List<Entry>.mergeSameWordEntries(pronunciation: String?): List<Entry> {
         val bracketContentRegex = Regex("\\{([^}]*)\\}") // `{}` 内のテキストを抽出
         val kanjiRegex = Regex("\\p{Script=Han}+") // 漢字のみを抽出
 
@@ -100,6 +105,7 @@ class Eijiro(
             Entry(
                 word = groupedEntries.first().word, // 先頭の `word` を採用
                 partOfSpeech = key,
+                pronunciation = pronunciation,
                 definition = groupedEntries.mapIndexed { index, value ->
                     value.copy(
                         definition = "${index + 1}. ${value.definition}"
@@ -107,6 +113,16 @@ class Eijiro(
                 }.joinToString("\n") { it.definition },
                 exampleSentence = groupedEntries.firstOrNull { it.exampleSentence != null }?.exampleSentence
             )
+        }
+    }
+
+    private fun List<Entry>.filterNotPronunciationEntry(): List<Entry> {
+        return mapNotNull { entry ->
+            if (entry.definition.contains("【＠】")) {
+                null
+            } else {
+                entry
+            }
         }
     }
 
@@ -128,6 +144,15 @@ class Eijiro(
         } else {
             null
         }
+    }
+
+    private fun extractPronunciation(entries: List<Entry>): String? {
+        val pronunciationIncludedEntry = entries.firstOrNull { entry ->
+            entry.definition.contains("【発音】")
+        } ?: return null
+        val regex = """【発音】([^、]+)""".toRegex()
+        val definition = pronunciationIncludedEntry.definition
+        return regex.find(definition)?.groupValues?.get(1)
     }
 
     private fun Char.isFullWidthChar(): Boolean {

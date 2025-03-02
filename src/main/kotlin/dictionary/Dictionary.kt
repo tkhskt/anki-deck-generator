@@ -8,6 +8,7 @@ interface Dictionary {
 
     data class Entry(
         val word: String,
+        val pronunciation: String? = null,
         val partOfSpeech: String?,
         val definition: String,
         val exampleSentence: ExampleSentence?,

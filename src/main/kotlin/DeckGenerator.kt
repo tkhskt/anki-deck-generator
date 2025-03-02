@@ -14,11 +14,10 @@ class DeckGenerator(
         val csvFile = File("$OUTPUT_DIR/$fileName.csv")
         val data = dictionaryEntries.map {
             listOf(
-                "${it.word}\n\n${it.exampleSentence?.en ?: ""}",
-                "${parsePartOfSpeech(it.partOfSpeech)}${it.definition}\n\n${it.exampleSentence?.ja ?: ""}${cardSeparator}"
+                front(entry = it),
+                back(entry = it)
             )
         }
-
         csvFile.printWriter().use { writer ->
             data.forEach { row ->
                 writer.println(row.joinToString(frontBackSeparator.toString()))
@@ -31,6 +30,20 @@ class DeckGenerator(
         if (!directory.exists()) {
             directory.mkdirs()
         }
+    }
+
+    private fun front(entry: Dictionary.Entry): String {
+        return "${entry.word}\n\n${parsePronunciation(entry.pronunciation)} ${entry.exampleSentence?.en ?: ""}"
+    }
+
+    private fun back(entry: Dictionary.Entry): String {
+        return "${parsePartOfSpeech(entry.partOfSpeech)}${entry.definition}\n\n${entry.exampleSentence?.ja ?: ""}${cardSeparator}"
+    }
+
+    private fun parsePronunciation(pronunciation: String?): String {
+        return pronunciation?.let {
+            "${it}\n\n"
+        } ?: ""
     }
 
     private fun parsePartOfSpeech(partOfSpeech: String?): String {
