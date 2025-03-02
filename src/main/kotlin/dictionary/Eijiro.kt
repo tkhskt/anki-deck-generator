@@ -7,24 +7,9 @@ class Eijiro(
     private val filePath: String,
 ) : Dictionary {
 
-    private val rawEntries: List<Entry>
-
-    init {
-        println("Dictionary Loading...")
-        val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
-        val entries = mutableListOf<Entry>()
-        stream.bufferedReader().useLines { lines ->
-            lines.forEach { line ->
-                entries.add(createEntryFrom(line))
-            }
-        }
-        rawEntries = entries.toList()
-        println("Loading Complete")
-    }
-
     override fun find(query: Dictionary.Query): List<Entry> {
         val entries = mutableListOf<Entry>()
-        rawEntries.forEach { entry ->
+        search { entry ->
             if (isTargetEntry(entry, query)) {
                 entries.add(entry)
             }
@@ -40,7 +25,7 @@ class Eijiro(
 
     override fun findAll(queries: List<Dictionary.Query>): List<Entry> {
         val entriesMap = mutableMapOf<Dictionary.Query, MutableList<Entry>>()
-        rawEntries.forEach { entry ->
+        search { entry ->
             queries.forEach { query ->
                 if (isTargetEntry(entry, query)) {
                     val entries = entriesMap.getOrPut(query) { mutableListOf() }
@@ -53,6 +38,15 @@ class Eijiro(
                 pronunciation = extractPronunciation(entries)
             )
         }.flatten().filterNotPronunciationEntry()
+    }
+
+    private fun search(action: (Entry) -> Unit) {
+        val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
+        stream.bufferedReader().useLines { lines ->
+            lines.forEach { line ->
+                action(createEntryFrom(line))
+            }
+        }
     }
 
     private fun openFile(): InputStream? {
