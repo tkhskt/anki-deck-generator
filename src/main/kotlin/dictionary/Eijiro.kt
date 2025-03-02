@@ -1,38 +1,41 @@
 package com.tkhskt.ankideckgenerator.dictionary
 
 import com.tkhskt.ankideckgenerator.dictionary.Dictionary.Entry
-import com.tkhskt.ankideckgenerator.dictionary.Dictionary.PartOfSpeech
 import java.io.InputStream
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class Eijiro(
     private val filePath: String,
 ) : Dictionary {
 
-    override suspend fun find(keyword: String, partOfSpeech: PartOfSpeech?): List<Entry> {
-        val entries = findEntries(keyword).mergeEntries()
-        return entries.filterPartOfSpeech(partOfSpeech)
-    }
+    private val rawEntries = mutableListOf<Entry>()
 
-    private suspend fun findEntries(keyword: String) = suspendCoroutine { cont ->
+    init {
+        println("Dictionary Loading...")
         val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
-
-        val entries = mutableListOf<Entry>()
         stream.bufferedReader().useLines { lines ->
             lines.forEach { line ->
-                if (isTargetEntry(line, keyword)) {
-                    val entry = createEntryFrom(line)
-                    entries.add(entry)
-                }
+                rawEntries.add(createEntryFrom(line))
             }
         }
-        if (entries.isNotEmpty()) {
-            cont.resume(entries.toList())
-        } else {
-            cont.resumeWithException(Exception("$keyword not found"))
+        println("Loading Complete")
+    }
+
+    override suspend fun find(query: Dictionary.Query): List<Entry> {
+        val entries = findEntries(query).mergeEntries()
+        return entries
+    }
+
+    private fun findEntries(query: Dictionary.Query): List<Entry> {
+        val entries = mutableListOf<Entry>()
+        rawEntries.forEach { entry ->
+            if (isTargetEntry(entry, query)) {
+                entries.add(entry)
+            }
         }
+        if (entries.isEmpty()) {
+            throw Exception("${query.keyword} not found")
+        }
+        return entries
     }
 
     private fun List<Entry>.mergeEntries(): List<Entry> {
@@ -49,7 +52,7 @@ class Eijiro(
         return grouped.mapNotNull { (key, groupedEntries) ->
             Entry(
                 word = groupedEntries.first().word, // 先頭の `word` を採用
-                partOfSpeech = "【${key}】", // `{}` で括って漢字部分のみ
+                partOfSpeech = key,
                 definition = groupedEntries.mapIndexed { index, value ->
                     value.copy(
                         definition = "${index + 1}. ${value.definition}"
@@ -60,22 +63,16 @@ class Eijiro(
         }
     }
 
-    private fun List<Entry>.filterPartOfSpeech(partOfSpeech: PartOfSpeech?): List<Entry> {
-        partOfSpeech ?: return this
-        return filter {
-            it.partOfSpeech?.contains(partOfSpeech.value) ?: false
-        }
-    }
-
     private fun openFile(): InputStream? {
         return {}::class.java.classLoader.getResourceAsStream(filePath)
     }
 
-    private fun isTargetEntry(input: String, targetKeyword: String): Boolean {
-        val regex = Regex("■$targetKeyword\\s*(\\{.*?\\})?\\s*:(.*)", RegexOption.MULTILINE)
-        val matchResult = regex.find(input)
-        val isMatchingEntry = matchResult != null && input.contains("【＠】").not()
-        return isMatchingEntry
+    private fun isTargetEntry(entry: Entry, query: Dictionary.Query): Boolean {
+        val isMatchingWord = entry.word == query.keyword && entry.definition.contains("【＠】").not()
+        val isMatchingPartOfSpeech = query.partOfSpeech?.let {
+            entry.partOfSpeech?.contains(it.value) ?: true
+        } ?: true
+        return isMatchingWord && isMatchingPartOfSpeech
     }
 
     private fun createEntryFrom(line: String): Entry {
@@ -83,7 +80,14 @@ class Eijiro(
 
         val matchResult = regex.find(line) ?: throw IllegalArgumentException()
         val keyword = matchResult.groupValues[1].trim() // `■` と `{}` の間の単語
-        val partOfSpeech = matchResult.groupValues.getOrNull(2)?.trim() ?: "" // `{}` 内の内容（ない場合は空文字）
+
+        val bracketPart = matchResult.groupValues.getOrNull(2)?.trim() // `{}` 内の内容
+        val partOfSpeech = if (bracketPart == null || bracketPart.none { it in '一'..'龯' }) {
+            null
+        } else {
+            bracketPart
+        }
+
         val definition = matchResult.groupValues.getOrNull(3)?.trim() ?: error("") // `:` の後のテキスト
 
         return Entry(

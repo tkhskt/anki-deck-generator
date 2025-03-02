@@ -6,6 +6,7 @@ import java.io.File
 class DeckGenerator(
     private val fileName: String,
     private val cardSeparator: String,
+    private val frontBackSeparator: Char,
 ) {
 
     fun generate(dictionaryEntries: List<Dictionary.Entry>) {
@@ -14,13 +15,13 @@ class DeckGenerator(
         val data = dictionaryEntries.map {
             listOf(
                 "${it.word}\n\n${it.exampleSentence?.en ?: ""}",
-                "${it.partOfSpeech}\n\n${it.definition}\n\n${it.exampleSentence?.ja ?: ""}${cardSeparator}"
+                "${parsePartOfSpeech(it.partOfSpeech)}${it.definition}\n\n${it.exampleSentence?.ja ?: ""}${cardSeparator}"
             )
         }
 
         csvFile.printWriter().use { writer ->
             data.forEach { row ->
-                writer.println(row.joinToString(","))
+                writer.println(row.joinToString(frontBackSeparator.toString()))
             }
         }
     }
@@ -30,6 +31,12 @@ class DeckGenerator(
         if (!directory.exists()) {
             directory.mkdirs()
         }
+    }
+
+    private fun parsePartOfSpeech(partOfSpeech: String?): String {
+        return partOfSpeech?.let {
+            "【$it】\n\n"
+        } ?: ""
     }
 
     companion object {

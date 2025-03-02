@@ -14,7 +14,8 @@ fun main() = runBlocking {
         )
         val generator = DeckGenerator(
             fileName = "deck",
-            cardSeparator = "tkhskt"
+            cardSeparator = "\$break\$",
+            frontBackSeparator = 'å'
         )
         generator.generate(entries)
     } catch (e: Exception) {
@@ -33,7 +34,12 @@ private suspend fun generateEntries(
         input.map {
             async {
                 println("Search: ${it.first()}")
-                val entry = dictionary.find(it[0], it.getOrNull(1)?.let { Dictionary.PartOfSpeech.find(it) })
+                val query = Dictionary.Query(
+                    keyword = it[0],
+                    partOfSpeech = it.getOrNull(1)?.let { Dictionary.PartOfSpeech.find(it) }
+                )
+                val entry = dictionary.find(query)
+                println("Found: ${it.first()}")
                 entries.addAll(entry)
             }
         }.awaitAll()

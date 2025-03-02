@@ -2,7 +2,7 @@ package com.tkhskt.ankideckgenerator.dictionary
 
 interface Dictionary {
 
-    suspend fun find(keyword: String, partOfSpeech: PartOfSpeech? = null): List<Entry>
+    suspend fun find(query: Query): List<Entry>
 
     data class Entry(
         val word: String,
@@ -30,6 +30,11 @@ interface Dictionary {
             }
         }
     }
+
+    data class Query(
+        val keyword: String,
+        val partOfSpeech: PartOfSpeech? = null,
+    )
 
     companion object {
         fun eijiro(filePath: String): Dictionary {
