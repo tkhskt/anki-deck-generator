@@ -20,12 +20,7 @@ class Eijiro(
         println("Loading Complete")
     }
 
-    override suspend fun find(query: Dictionary.Query): List<Entry> {
-        val entries = findEntries(query).mergeEntries()
-        return entries
-    }
-
-    private fun findEntries(query: Dictionary.Query): List<Entry> {
+    override fun find(query: Dictionary.Query): List<Entry> {
         val entries = mutableListOf<Entry>()
         rawEntries.forEach { entry ->
             if (isTargetEntry(entry, query)) {
@@ -35,10 +30,27 @@ class Eijiro(
         if (entries.isEmpty()) {
             throw Exception("${query.keyword} not found")
         }
-        return entries
+        return entries.sortedBy { it.partOfSpeech }.mergeSameWordEntries()
     }
 
-    private fun List<Entry>.mergeEntries(): List<Entry> {
+    override fun findAll(queries: List<Dictionary.Query>): List<Entry> {
+        val entriesMap = mutableMapOf<Dictionary.Query, List<Entry>>()
+        rawEntries.forEach { entry ->
+            queries.forEach { query ->
+                if (isTargetEntry(entry, query)) {
+                    val entries = entriesMap.getOrPut(query) { listOf() }
+                    entriesMap[query] = entries.toMutableList().apply {
+                        add(entry)
+                    }
+                }
+            }
+        }
+        return entriesMap.map { (_, entries) ->
+            entries.sortedBy { it.partOfSpeech }.mergeSameWordEntries()
+        }.flatten()
+    }
+
+    private fun List<Entry>.mergeSameWordEntries(): List<Entry> {
         val bracketContentRegex = Regex("\\{([^}]*)\\}") // `{}` 内のテキストを抽出
         val kanjiRegex = Regex("\\p{Script=Han}+") // 漢字のみを抽出
 
