@@ -32,9 +32,8 @@ class Eijiro(
         if (entries.isEmpty()) {
             throw Exception("${query.keyword} not found")
         }
-        return entries.sortedBy { it.partOfSpeech }.mergeSameWordEntries()
+        return entries.mergeSameWordEntries()
     }
-
 
     override fun findAll(queries: List<Dictionary.Query>): List<Entry> {
         val entriesMap = mutableMapOf<Dictionary.Query, MutableList<Entry>>()
@@ -47,7 +46,7 @@ class Eijiro(
             }
         }
         return entriesMap.map { (_, entries) ->
-            entries.sortedBy { it.partOfSpeech }.mergeSameWordEntries()
+            entries.mergeSameWordEntries()
         }.flatten()
     }
 
@@ -112,13 +111,26 @@ class Eijiro(
     }
 
     private fun extractExampleSentence(wordDefinition: String): Entry.ExampleSentence? {
-        val regex = Regex("■・(.*?\\.)\\s*(.*)")
+        // 例文の部分を取得
+        val regex = Regex("■・([^■]+)")
+        val match = regex.find(wordDefinition) ?: return null
 
-        val matchResult = regex.find(wordDefinition) ?: return null
+        val sentence = match.groupValues[1].trim()
 
-        return Entry.ExampleSentence(
-            en = matchResult.groupValues[1].trim(),
-            ja = matchResult.groupValues[2].trim()
-        )
+        val splitIndex = sentence.indexOfFirst { it.isFullWidthChar() }
+        return if (splitIndex != -1) {
+            val english = sentence.substring(0, splitIndex).trim()
+            val japanese = sentence.substring(splitIndex).trim()
+            Entry.ExampleSentence(
+                en = english,
+                ja = japanese
+            )
+        } else {
+            null
+        }
+    }
+
+    private fun Char.isFullWidthChar(): Boolean {
+        return this.code > 0xFF
     }
 }
