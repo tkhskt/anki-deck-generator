@@ -7,16 +7,18 @@ class Eijiro(
     private val filePath: String,
 ) : Dictionary {
 
-    private val rawEntries = mutableListOf<Entry>()
+    private val rawEntries: List<Entry>
 
     init {
         println("Dictionary Loading...")
         val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
+        val entries = mutableListOf<Entry>()
         stream.bufferedReader().useLines { lines ->
             lines.forEach { line ->
-                rawEntries.add(createEntryFrom(line))
+                entries.add(createEntryFrom(line))
             }
         }
+        rawEntries = entries.toList()
         println("Loading Complete")
     }
 
