@@ -26,11 +26,10 @@ private fun generateEntries(
 ): List<Dictionary.Entry> {
     val input = CsvLoader(inputFilePath).read()
     val dictionary: Dictionary = Dictionary.eijiro(dictionaryPath)
-
-    val queries = input.map {
+    val queries = input.map { query ->
         Dictionary.Query(
-            keyword = it[0],
-            partOfSpeech = it.getOrNull(1)?.let { Dictionary.PartOfSpeech.find(it) }
+            keyword = query[0],
+            partOfSpeech = query.getOrNull(1)?.let { Dictionary.PartOfSpeech.find(it) }
         )
     }
     val entries = dictionary.findAll(queries)

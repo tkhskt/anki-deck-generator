@@ -35,21 +35,55 @@ class Eijiro(
         return entries.sortedBy { it.partOfSpeech }.mergeSameWordEntries()
     }
 
+
     override fun findAll(queries: List<Dictionary.Query>): List<Entry> {
-        val entriesMap = mutableMapOf<Dictionary.Query, List<Entry>>()
+        val entriesMap = mutableMapOf<Dictionary.Query, MutableList<Entry>>()
         rawEntries.forEach { entry ->
             queries.forEach { query ->
                 if (isTargetEntry(entry, query)) {
-                    val entries = entriesMap.getOrPut(query) { listOf() }
-                    entriesMap[query] = entries.toMutableList().apply {
-                        add(entry)
-                    }
+                    val entries = entriesMap.getOrPut(query) { mutableListOf() }
+                    entries.add(entry)
                 }
             }
         }
         return entriesMap.map { (_, entries) ->
             entries.sortedBy { it.partOfSpeech }.mergeSameWordEntries()
         }.flatten()
+    }
+
+    private fun openFile(): InputStream? {
+        return {}::class.java.classLoader.getResourceAsStream(filePath)
+    }
+
+    private fun createEntryFrom(line: String): Entry {
+        val regex = Regex("■(.*?)\\s*(\\{.*?\\})?\\s*:(.*)", RegexOption.MULTILINE)
+
+        val matchResult = regex.find(line) ?: throw IllegalArgumentException()
+        val keyword = matchResult.groupValues[1].trim() // `■` と `{}` の間の単語
+
+        val bracketPart = matchResult.groupValues.getOrNull(2)?.trim() // `{}` 内の内容
+        val partOfSpeech = if (bracketPart == null || bracketPart.none { it in '一'..'龯' }) {
+            null
+        } else {
+            bracketPart
+        }
+
+        val definition = matchResult.groupValues.getOrNull(3)?.trim() ?: error("") // `:` の後のテキスト
+
+        return Entry(
+            word = keyword,
+            partOfSpeech = partOfSpeech,
+            definition = definition.split("■・").first(),
+            exampleSentence = extractExampleSentence(definition)
+        )
+    }
+
+    private fun isTargetEntry(entry: Entry, query: Dictionary.Query): Boolean {
+        val isMatchingWord = entry.word == query.keyword && entry.definition.contains("【＠】").not()
+        val isMatchingPartOfSpeech = query.partOfSpeech?.let {
+            entry.partOfSpeech?.contains(it.value) ?: true
+        } ?: true
+        return isMatchingWord && isMatchingPartOfSpeech
     }
 
     private fun List<Entry>.mergeSameWordEntries(): List<Entry> {
@@ -75,41 +109,6 @@ class Eijiro(
                 exampleSentence = groupedEntries.firstOrNull { it.exampleSentence != null }?.exampleSentence
             )
         }
-    }
-
-    private fun openFile(): InputStream? {
-        return {}::class.java.classLoader.getResourceAsStream(filePath)
-    }
-
-    private fun isTargetEntry(entry: Entry, query: Dictionary.Query): Boolean {
-        val isMatchingWord = entry.word == query.keyword && entry.definition.contains("【＠】").not()
-        val isMatchingPartOfSpeech = query.partOfSpeech?.let {
-            entry.partOfSpeech?.contains(it.value) ?: true
-        } ?: true
-        return isMatchingWord && isMatchingPartOfSpeech
-    }
-
-    private fun createEntryFrom(line: String): Entry {
-        val regex = Regex("■(.*?)\\s*(\\{.*?\\})?\\s*:(.*)", RegexOption.MULTILINE)
-
-        val matchResult = regex.find(line) ?: throw IllegalArgumentException()
-        val keyword = matchResult.groupValues[1].trim() // `■` と `{}` の間の単語
-
-        val bracketPart = matchResult.groupValues.getOrNull(2)?.trim() // `{}` 内の内容
-        val partOfSpeech = if (bracketPart == null || bracketPart.none { it in '一'..'龯' }) {
-            null
-        } else {
-            bracketPart
-        }
-
-        val definition = matchResult.groupValues.getOrNull(3)?.trim() ?: error("") // `:` の後のテキスト
-
-        return Entry(
-            word = keyword,
-            partOfSpeech = partOfSpeech,
-            definition = definition.split("■・").first(),
-            exampleSentence = extractExampleSentence(definition)
-        )
     }
 
     private fun extractExampleSentence(wordDefinition: String): Entry.ExampleSentence? {
