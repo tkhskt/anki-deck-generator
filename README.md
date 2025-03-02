@@ -11,7 +11,9 @@
 ```
 assurance
 
-German officials have offered assurances that the incident will be pursued vigorously.
+э∫u'(э)rэns
+
+ German officials have offered assurances that the incident will be pursued vigorously.
 ```
 
 ### 裏面
