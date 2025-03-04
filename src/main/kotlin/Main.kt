@@ -20,7 +20,7 @@ fun main() = runBlocking {
     }
 }
 
-private fun generateEntries(
+private suspend fun generateEntries(
     inputFilePath: String,
     dictionaryPath: String,
 ): List<Dictionary.Entry> {

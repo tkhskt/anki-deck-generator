@@ -1,13 +1,35 @@
 package com.tkhskt.ankideckgenerator.dictionary
 
 import com.tkhskt.ankideckgenerator.dictionary.Dictionary.Entry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.io.InputStream
 
 class Eijiro(
     private val filePath: String,
 ) : Dictionary {
 
-    override fun find(query: Dictionary.Query): List<Entry> {
+    private val chunkedEntries: List<Sequence<Entry>>
+
+    init {
+        println("Dictionary Loading...")
+        val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
+        val entries = mutableListOf<Entry>()
+        stream.bufferedReader().useLines { lines ->
+            lines.forEach { line ->
+                entries.add(createEntryFrom(line))
+            }
+        }
+        val numberOfSplits = 5
+        chunkedEntries = entries.windowed(numberOfSplits, numberOfSplits, true).map {
+            it.asSequence()
+        }
+        println("Loading Complete")
+    }
+
+    override suspend fun find(query: Dictionary.Query): List<Entry> {
         val entries = mutableListOf<Entry>()
         search { entry ->
             if (isTargetEntry(entry, query)) {
@@ -20,10 +42,10 @@ class Eijiro(
 
         return entries.mergeSameWordEntries(
             pronunciation = extractPronunciation(entries)
-        ).filterNotPronunciationEntry()
+        ).filterNotPronunciationEntry().sortByWord()
     }
 
-    override fun findAll(queries: List<Dictionary.Query>): List<Entry> {
+    override suspend fun findAll(queries: List<Dictionary.Query>): List<Entry> {
         val entriesMap = mutableMapOf<Dictionary.Query, MutableList<Entry>>()
         search { entry ->
             queries.forEach { query ->
@@ -37,15 +59,16 @@ class Eijiro(
             entries.mergeSameWordEntries(
                 pronunciation = extractPronunciation(entries)
             )
-        }.flatten().filterNotPronunciationEntry()
+        }.flatten().filterNotPronunciationEntry().sortByWord()
     }
 
-    private fun search(action: (Entry) -> Unit) {
-        val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
-        stream.bufferedReader().useLines { lines ->
-            lines.forEach { line ->
-                action(createEntryFrom(line))
-            }
+    private suspend fun search(action: (Entry) -> Unit) {
+        coroutineScope {
+            chunkedEntries.map { entries ->
+                async(Dispatchers.Default) {
+                    entries.forEach { action(it) }
+                }
+            }.awaitAll()
         }
     }
 
@@ -119,6 +142,8 @@ class Eijiro(
             }
         }
     }
+
+    private fun List<Entry>.sortByWord(): List<Entry> = sortedBy { it.word }
 
     private fun extractExampleSentence(wordDefinition: String): Entry.ExampleSentence? {
         // 例文の部分を取得

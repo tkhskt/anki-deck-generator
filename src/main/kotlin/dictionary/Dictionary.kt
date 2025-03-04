@@ -2,9 +2,9 @@ package com.tkhskt.ankideckgenerator.dictionary
 
 interface Dictionary {
 
-    fun find(query: Query): List<Entry>
+    suspend fun find(query: Query): List<Entry>
 
-    fun findAll(queries: List<Query>): List<Entry>
+    suspend fun findAll(queries: List<Query>): List<Entry>
 
     data class Entry(
         val word: String,
