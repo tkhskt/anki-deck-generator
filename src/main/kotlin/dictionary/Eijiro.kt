@@ -5,6 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.InputStream
 
 class Eijiro(
@@ -22,8 +24,8 @@ class Eijiro(
                 entries.add(createEntryFrom(line))
             }
         }
-        val numberOfSplits = 5
-        chunkedEntries = entries.windowed(numberOfSplits, numberOfSplits, true).map {
+        val numberOfSplits = entries.size / 10
+        chunkedEntries = entries.chunked(numberOfSplits).map {
             it.asSequence()
         }
         println("Loading Complete")
@@ -31,10 +33,9 @@ class Eijiro(
 
     override suspend fun find(query: Dictionary.Query): List<Entry> {
         val entries = mutableListOf<Entry>()
-        search { entry ->
-            if (isTargetEntry(entry, query)) {
-                entries.add(entry)
-            }
+        search { entry, mutex ->
+            if (isTargetEntry(entry, query)) return@search
+            mutex.withLock { entries.add(entry) }
         }
         if (entries.isEmpty()) {
             throw Exception("${query.keyword} not found")
@@ -42,14 +43,15 @@ class Eijiro(
 
         return entries.mergeSameWordEntries(
             pronunciation = extractPronunciation(entries)
-        ).filterNotPronunciationEntry().sortByWord()
+        ).filterNotPronunciationEntry()
     }
 
     override suspend fun findAll(queries: List<Dictionary.Query>): List<Entry> {
         val entriesMap = mutableMapOf<Dictionary.Query, MutableList<Entry>>()
-        search { entry ->
+        search { entry, mutex ->
             queries.forEach { query ->
-                if (isTargetEntry(entry, query)) {
+                if (isTargetEntry(entry, query).not()) return@forEach
+                mutex.withLock {
                     val entries = entriesMap.getOrPut(query) { mutableListOf() }
                     entries.add(entry)
                 }
@@ -59,14 +61,15 @@ class Eijiro(
             entries.mergeSameWordEntries(
                 pronunciation = extractPronunciation(entries)
             )
-        }.flatten().filterNotPronunciationEntry().sortByWord()
+        }.flatten().filterNotPronunciationEntry()
     }
 
-    private suspend fun search(action: (Entry) -> Unit) {
+    private suspend fun search(action: suspend (Entry, Mutex) -> Unit) {
+        val mutex = Mutex()
         coroutineScope {
             chunkedEntries.map { entries ->
                 async(Dispatchers.Default) {
-                    entries.forEach { action(it) }
+                    entries.forEach { action(it, mutex) }
                 }
             }.awaitAll()
         }
@@ -142,8 +145,6 @@ class Eijiro(
             }
         }
     }
-
-    private fun List<Entry>.sortByWord(): List<Entry> = sortedBy { it.word }
 
     private fun extractExampleSentence(wordDefinition: String): Entry.ExampleSentence? {
         // 例文の部分を取得

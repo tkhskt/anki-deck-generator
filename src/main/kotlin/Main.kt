@@ -3,22 +3,20 @@ package com.tkhskt.ankideckgenerator
 import com.tkhskt.ankideckgenerator.dictionary.Dictionary
 import kotlinx.coroutines.runBlocking
 
-fun main() = runBlocking {
-    measure {
-        try {
-            val entries = generateEntries(
-                inputFilePath = "input.csv",
-                dictionaryPath = "dictionary/eijiro.txt"
-            )
-            val generator = DeckGenerator(
-                fileName = "deck",
-                cardSeparator = "\$break\$",
-                frontBackSeparator = 'å'
-            )
-            generator.generate(entries)
-        } catch (e: Exception) {
-            println(e.toString())
-        }
+fun main() = measure {
+    try {
+        val entries = generateEntries(
+            inputFilePath = "input.csv",
+            dictionaryPath = "dictionary/eijiro.txt"
+        )
+        val generator = DeckGenerator(
+            fileName = "deck",
+            cardSeparator = "\$break\$",
+            frontBackSeparator = 'å'
+        )
+        generator.generate(entries)
+    } catch (e: Exception) {
+        println(e.toString())
     }
 }
 
@@ -38,9 +36,11 @@ private suspend fun generateEntries(
     return entries
 }
 
-private suspend fun measure(block: suspend () -> Unit) {
+private fun measure(block: suspend () -> Unit) {
     val start = System.currentTimeMillis()
-    block()
+    runBlocking {
+        block()
+    }
     val end = System.currentTimeMillis()
     println("Execution Time: ${end - start}ms")
 }
