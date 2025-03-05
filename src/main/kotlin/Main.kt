@@ -4,19 +4,21 @@ import com.tkhskt.ankideckgenerator.dictionary.Dictionary
 import kotlinx.coroutines.runBlocking
 
 fun main() = runBlocking {
-    try {
-        val entries = generateEntries(
-            inputFilePath = "input.csv",
-            dictionaryPath = "dictionary/eijiro.txt"
-        )
-        val generator = DeckGenerator(
-            fileName = "deck",
-            cardSeparator = "\$break\$",
-            frontBackSeparator = 'å'
-        )
-        generator.generate(entries)
-    } catch (e: Exception) {
-        println(e.toString())
+    measure {
+        try {
+            val entries = generateEntries(
+                inputFilePath = "input.csv",
+                dictionaryPath = "dictionary/eijiro.txt"
+            )
+            val generator = DeckGenerator(
+                fileName = "deck",
+                cardSeparator = "\$break\$",
+                frontBackSeparator = 'å'
+            )
+            generator.generate(entries)
+        } catch (e: Exception) {
+            println(e.toString())
+        }
     }
 }
 
@@ -34,4 +36,11 @@ private suspend fun generateEntries(
     }
     val entries = dictionary.findAll(queries)
     return entries
+}
+
+private suspend fun measure(block: suspend () -> Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    println("Execution Time: ${end - start}ms")
 }
