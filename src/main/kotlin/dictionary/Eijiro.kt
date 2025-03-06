@@ -20,8 +20,8 @@ class Eijiro(
         val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
         val entries = mutableListOf<Entry>()
         stream.bufferedReader().useLines { lines ->
-            lines.forEach { line ->
-                entries.add(createEntryFrom(line))
+            lines.forEachIndexed { index, line ->
+                entries.add(createEntryFrom(index, line))
             }
         }
         val numberOfSplits = entries.size / 10
@@ -32,36 +32,26 @@ class Eijiro(
     }
 
     override suspend fun find(query: Dictionary.Query): List<Entry> {
-        val entries = mutableListOf<Entry>()
-        search { entry, mutex ->
-            if (isTargetEntry(entry, query)) return@search
-            mutex.withLock { entries.add(entry) }
-        }
-        if (entries.isEmpty()) {
-            throw Exception("${query.keyword} not found")
-        }
-
-        return entries.mergeSameWordEntries(
-            pronunciation = extractPronunciation(entries)
-        ).filterNotPronunciationEntry()
+        return findAll(listOf(query))
     }
 
     override suspend fun findAll(queries: List<Dictionary.Query>): List<Entry> {
-        val entriesMap = mutableMapOf<Dictionary.Query, MutableList<Entry>>()
+        val entriesMap = queries.associateWith { mutableListOf<Entry>() }
         search { entry, mutex ->
             queries.forEach { query ->
                 if (isTargetEntry(entry, query).not()) return@forEach
                 mutex.withLock {
-                    val entries = entriesMap.getOrPut(query) { mutableListOf() }
-                    entries.add(entry)
+                    val entries = entriesMap[query]
+                    entries?.add(entry)
                 }
             }
         }
         return entriesMap.map { (_, entries) ->
-            entries.mergeSameWordEntries(
-                pronunciation = extractPronunciation(entries)
-            )
-        }.flatten().filterNotPronunciationEntry()
+            entries
+                .sortById()
+                .mergeSameWordEntries(pronunciation = extractPronunciation(entries))
+                .filterNotPronunciationEntry()
+        }.flatten()
     }
 
     private suspend fun search(action: suspend (Entry, Mutex) -> Unit) {
@@ -79,7 +69,7 @@ class Eijiro(
         return {}::class.java.classLoader.getResourceAsStream(filePath)
     }
 
-    private fun createEntryFrom(line: String): Entry {
+    private fun createEntryFrom(id: Int, line: String): Entry {
         val regex = Regex("■(.*?)\\s*(\\{.*?\\})?\\s*:(.*)", RegexOption.MULTILINE)
 
         val matchResult = regex.find(line) ?: throw IllegalArgumentException()
@@ -95,6 +85,7 @@ class Eijiro(
         val definition = matchResult.groupValues.getOrNull(3)?.trim() ?: error("") // `:` の後のテキスト
 
         return Entry(
+            id = id,
             word = keyword,
             partOfSpeech = partOfSpeech,
             definition = definition.split("■・").first(),
@@ -110,6 +101,8 @@ class Eijiro(
         return isMatchingWord && isMatchingPartOfSpeech
     }
 
+    private fun List<Entry>.sortById(): List<Entry> = sortedBy { it.id }
+
     private fun List<Entry>.mergeSameWordEntries(pronunciation: String?): List<Entry> {
         val bracketContentRegex = Regex("\\{([^}]*)\\}") // `{}` 内のテキストを抽出
         val kanjiRegex = Regex("\\p{Script=Han}+") // 漢字のみを抽出
@@ -123,6 +116,7 @@ class Eijiro(
 
         return grouped.mapNotNull { (key, groupedEntries) ->
             Entry(
+                id = groupedEntries.first().id,
                 word = groupedEntries.first().word, // 先頭の `word` を採用
                 partOfSpeech = key,
                 pronunciation = pronunciation,

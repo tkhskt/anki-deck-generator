@@ -7,6 +7,7 @@ interface Dictionary {
     suspend fun findAll(queries: List<Query>): List<Entry>
 
     data class Entry(
+        val id: Int,
         val word: String,
         val pronunciation: String? = null,
         val partOfSpeech: String?,
