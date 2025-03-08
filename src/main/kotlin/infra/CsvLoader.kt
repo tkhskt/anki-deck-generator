@@ -1,4 +1,4 @@
-package com.tkhskt.ankideckgenerator
+package com.tkhskt.ankideckgenerator.infra
 
 import java.io.File
 

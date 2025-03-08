@@ -1,6 +1,5 @@
-package com.tkhskt.ankideckgenerator
+package com.tkhskt.ankideckgenerator.domain
 
-import com.tkhskt.ankideckgenerator.dictionary.Dictionary
 import java.io.File
 
 class DeckGenerator(

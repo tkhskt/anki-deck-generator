@@ -1,20 +1,12 @@
 package com.tkhskt.ankideckgenerator
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.window.application
-import com.tkhskt.ankideckgenerator.dictionary.Dictionary
-import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import com.tkhskt.ankideckgenerator.domain.DeckGenerator
+import com.tkhskt.ankideckgenerator.domain.Dictionary
+import com.tkhskt.ankideckgenerator.infra.CsvLoader
+import com.tkhskt.ankideckgenerator.ui.App
+import kotlinx.coroutines.runBlocking
 
 fun main() = application {
     measure {
@@ -38,22 +30,6 @@ fun main() = application {
         App()
     }
 }
-
-@Composable
-@Preview
-fun App() {
-    var text by remember { mutableStateOf("Hello, World!") }
-
-    MaterialTheme {
-        Button(
-            onClick = { text = "Hello, Desktop!" },
-            modifier = Modifier.testTag("button")
-        ) {
-            Text(text)
-        }
-    }
-}
-
 
 private suspend fun generateEntries(
     inputFilePath: String,

@@ -1,6 +1,7 @@
-package com.tkhskt.ankideckgenerator.dictionary
+package com.tkhskt.ankideckgenerator.infra
 
-import com.tkhskt.ankideckgenerator.dictionary.Dictionary.Entry
+import com.tkhskt.ankideckgenerator.domain.Dictionary
+import com.tkhskt.ankideckgenerator.domain.Dictionary.Entry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

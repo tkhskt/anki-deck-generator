@@ -1,4 +1,6 @@
-package com.tkhskt.ankideckgenerator.dictionary
+package com.tkhskt.ankideckgenerator.domain
+
+import com.tkhskt.ankideckgenerator.infra.Eijiro
 
 interface Dictionary {
 
