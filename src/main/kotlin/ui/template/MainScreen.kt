@@ -16,7 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tkhskt.ankideckgenerator.ui.MainUiState
+import com.tkhskt.ankideckgenerator.ui.page.MainUiState
 import com.tkhskt.ankideckgenerator.ui.organization.Card
 import com.tkhskt.ankideckgenerator.ui.organization.FileDialog
 import com.tkhskt.ankideckgenerator.ui.organization.Mode

@@ -1,4 +1,4 @@
-package com.tkhskt.ankideckgenerator.ui
+package com.tkhskt.ankideckgenerator.ui.page
 
 import com.tkhskt.ankideckgenerator.domain.Card
 import com.tkhskt.ankideckgenerator.domain.Dictionary

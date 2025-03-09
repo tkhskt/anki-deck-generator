@@ -1,4 +1,4 @@
-package com.tkhskt.ankideckgenerator.ui
+package com.tkhskt.ankideckgenerator.ui.page
 
 import com.tkhskt.ankideckgenerator.domain.Card
 import com.tkhskt.ankideckgenerator.domain.CardFactory
@@ -6,6 +6,7 @@ import com.tkhskt.ankideckgenerator.domain.Deck
 import com.tkhskt.ankideckgenerator.domain.Dictionary
 import com.tkhskt.ankideckgenerator.infra.CsvLoader
 import com.tkhskt.ankideckgenerator.infra.DeckExporter
+import com.tkhskt.ankideckgenerator.ui.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
