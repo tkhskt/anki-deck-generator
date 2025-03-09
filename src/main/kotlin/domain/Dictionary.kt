@@ -1,7 +1,5 @@
 package com.tkhskt.ankideckgenerator.domain
 
-import com.tkhskt.ankideckgenerator.infra.EijiroLoader
-
 interface Dictionary {
 
     suspend fun find(query: Query): List<Entry>
@@ -41,10 +39,4 @@ interface Dictionary {
         val keyword: String,
         val partOfSpeech: PartOfSpeech? = null,
     )
-
-    companion object {
-        fun eijiro(filePath: String): Dictionary {
-            return EijiroLoader(filePath).load()
-        }
-    }
 }

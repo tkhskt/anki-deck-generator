@@ -3,16 +3,22 @@ package com.tkhskt.ankideckgenerator.ui.page
 import com.tkhskt.ankideckgenerator.domain.Card
 import com.tkhskt.ankideckgenerator.domain.CardFactory
 import com.tkhskt.ankideckgenerator.domain.Deck
+import com.tkhskt.ankideckgenerator.domain.DeckRepository
 import com.tkhskt.ankideckgenerator.domain.Dictionary
+import com.tkhskt.ankideckgenerator.domain.DictionaryRepository
 import com.tkhskt.ankideckgenerator.infra.CsvLoader
-import com.tkhskt.ankideckgenerator.infra.DeckExporter
 import com.tkhskt.ankideckgenerator.ui.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val dictionaryRepository: DictionaryRepository,
+    private val cardFactory: CardFactory,
+    private val deckRepository: DeckRepository,
+    private val csvLoader: CsvLoader,
+) : ViewModel() {
 
     private val state = MutableStateFlow(MainState.Empty)
     val uiState = state.map { MainUiState(it) }
@@ -24,8 +30,7 @@ class MainViewModel : ViewModel() {
                     isDictionaryLoading = true
                 )
             }
-            val dictionary = Dictionary.eijiro("dictionary/eijiro.txt")
-//            val dictionary = DictionaryStub()
+            val dictionary = dictionaryRepository.get()
             state.update {
                 it.copy(
                     dictionary = dictionary,
@@ -55,7 +60,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun searchByFile(filePath: String) {
-        val input = CsvLoader(filePath).read()
+        val input = csvLoader.read(filePath)
         val queries = input.associate { query ->
             query[0] to query.getOrNull(1)?.let { Dictionary.PartOfSpeech.find(it) }
         }
@@ -66,14 +71,11 @@ class MainViewModel : ViewModel() {
 
     fun exportDeck(filePath: String) {
         val cards = state.value.searchResult ?: return
-        val exporter = DeckExporter(
-            cardSeparator = "\$break\$",
-        )
         val deck = Deck(
             cards = cards
         )
         viewModelScope.launch {
-            exporter.export(deck, filePath)
+            deckRepository.save(deck, filePath)
         }
     }
 
@@ -93,7 +95,7 @@ class MainViewModel : ViewModel() {
                 partOfSpeech = partOfSpeech,
             )
             val entries = dictionary.find(query)
-            val cards = entries.map { entry -> CardFactory().create(entry) }
+            val cards = entries.map { entry -> cardFactory.create(entry) }
             state.update {
                 it.copy(
                     isSearching = false,
@@ -112,7 +114,7 @@ class MainViewModel : ViewModel() {
                 Dictionary.Query(it.key, it.value)
             }
             val entries = dictionary.findAll(queries)
-            val cards = entries.map { entry -> CardFactory().create(entry) }
+            val cards = entries.map { entry -> cardFactory.create(entry) }
             state.update {
                 it.copy(
                     isSearching = false,

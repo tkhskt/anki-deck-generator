@@ -2,15 +2,15 @@ package com.tkhskt.ankideckgenerator.infra
 
 import com.tkhskt.ankideckgenerator.domain.Dictionary
 import com.tkhskt.ankideckgenerator.domain.Dictionary.Entry
-import com.tkhskt.ankideckgenerator.domain.DictionaryLoader
+import com.tkhskt.ankideckgenerator.domain.DictionaryRepository
 import java.io.InputStream
 
-class EijiroLoader(
+class EijiroRepository(
     private val filePath: String
-) : DictionaryLoader {
+) : DictionaryRepository {
     private var chunkedEntries: List<Sequence<Entry>> = emptyList()
 
-    override fun load(): Dictionary {
+    override fun get(): Dictionary {
         println("Dictionary Loading...")
         val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
         val entries = mutableListOf<Entry>()
