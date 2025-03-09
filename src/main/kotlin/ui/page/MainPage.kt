@@ -19,7 +19,7 @@ fun MainPage(viewModel: MainViewModel = remember { MainViewModel() }) {
         uiState = uiState,
         onKeywordChange = { viewModel.changeKeyword(it) },
         onPartOfSpeechChange = { viewModel.changePartOfSpeech(it) },
-        onInputFilePathSelect = { viewModel.onInputFilePathSelect(it) },
-        onExportFilePathSelect = { viewModel.onExportFilePathSelect(it) }
+        onInputFilePathSelect = { viewModel.searchByFile(it) },
+        onExportFilePathSelect = { viewModel.exportDeck(it) }
     )
 }

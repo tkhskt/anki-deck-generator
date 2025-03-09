@@ -54,7 +54,7 @@ class MainViewModel : ViewModel() {
         )
     }
 
-    fun onInputFilePathSelect(filePath: String) {
+    fun searchByFile(filePath: String) {
         val input = CsvLoader(filePath).read()
         val queries = input.associate { query ->
             query[0] to query.getOrNull(1)?.let { Dictionary.PartOfSpeech.find(it) }
@@ -64,7 +64,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun onExportFilePathSelect(filePath: String) {
+    fun exportDeck(filePath: String) {
         val cards = state.value.searchResult ?: return
         val exporter = DeckExporter(
             cardSeparator = "\$break\$",
