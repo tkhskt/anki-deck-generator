@@ -1,14 +1,10 @@
 package com.tkhskt.ankideckgenerator
 
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.singleWindowApplication
 import com.tkhskt.ankideckgenerator.ui.App
 
-fun main() = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Anki Deck Generator"
-    ) {
-        App()
-    }
+fun main() = singleWindowApplication(
+    title = "Anki Deck Generator"
+) {
+    App()
 }
