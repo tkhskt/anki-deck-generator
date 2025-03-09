@@ -5,7 +5,10 @@ import androidx.compose.ui.window.application
 import com.tkhskt.ankideckgenerator.ui.App
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Anki Deck Generator"
+    ) {
         App()
     }
 }
