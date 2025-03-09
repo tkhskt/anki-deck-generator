@@ -1,28 +1,27 @@
 package com.tkhskt.ankideckgenerator.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import com.tkhskt.ankideckgenerator.ui.template.MainScreen
 
 @Composable
-@Preview
-fun App() {
-    var text by remember { mutableStateOf("Hello, World!") }
+fun App(viewModel: MainViewModel) {
+    LaunchedEffect(Unit) {
+        viewModel.init()
+    }
 
-    MaterialTheme {
-        Button(
-            onClick = { text = "Hello, Desktop!" },
-            modifier = Modifier.testTag("button")
-        ) {
-            Text(text)
-        }
+    val uiState by viewModel.uiState.collectAsState(MainUiState.Empty)
+
+    AnkiDeckGeneratorTheme {
+        MainScreen(
+            uiState = uiState,
+            onKeywordChange = { viewModel.changeKeyword(it) },
+            onPartOfSpeechChange = { viewModel.changePartOfSpeech(it) },
+            onInputFilePathSelect = { viewModel.onInputFilePathSelect(it) },
+            onExportFilePathSelect = { viewModel.onExportFilePathSelect(it) }
+        )
     }
 }
+

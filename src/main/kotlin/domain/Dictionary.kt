@@ -1,6 +1,6 @@
 package com.tkhskt.ankideckgenerator.domain
 
-import com.tkhskt.ankideckgenerator.infra.Eijiro
+import com.tkhskt.ankideckgenerator.infra.EijiroLoader
 
 interface Dictionary {
 
@@ -44,7 +44,7 @@ interface Dictionary {
 
     companion object {
         fun eijiro(filePath: String): Dictionary {
-            return Eijiro(filePath)
+            return EijiroLoader(filePath).load()
         }
     }
 }
