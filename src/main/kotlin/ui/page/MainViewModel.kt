@@ -19,7 +19,6 @@ class MainViewModel(
     private val deckRepository: DeckRepository,
     private val csvLoader: CsvLoader,
 ) : ViewModel() {
-
     private val state = MutableStateFlow(MainState.Empty)
     val uiState = state.map { MainUiState(it) }
 
@@ -27,14 +26,14 @@ class MainViewModel(
         viewModelScope.launch {
             state.update {
                 it.copy(
-                    isDictionaryLoading = true
+                    isDictionaryLoading = true,
                 )
             }
             val dictionary = dictionaryRepository.get()
             state.update {
                 it.copy(
                     dictionary = dictionary,
-                    isDictionaryLoading = false
+                    isDictionaryLoading = false,
                 )
             }
         }
@@ -55,7 +54,7 @@ class MainViewModel(
     fun changePartOfSpeech(partOfSpeech: String?) {
         search(
             keyword = state.value.keyword,
-            partOfSpeech = partOfSpeech?.let { Dictionary.PartOfSpeech.find(it) }
+            partOfSpeech = partOfSpeech?.let { Dictionary.PartOfSpeech.find(it) },
         )
     }
 
@@ -72,7 +71,7 @@ class MainViewModel(
     fun exportDeck(filePath: String) {
         val cards = state.value.searchResult ?: return
         val deck = Deck(
-            cards = cards
+            cards = cards,
         )
         viewModelScope.launch {
             deckRepository.save(deck, filePath)

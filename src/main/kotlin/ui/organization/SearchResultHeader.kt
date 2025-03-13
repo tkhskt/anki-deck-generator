@@ -19,17 +19,17 @@ fun SearchResultHeader(
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
-            text = "Result: $numberOfCards"
+            text = "Result: $numberOfCards",
         )
         Button(
             onClick = onFileExportButtonClick,
             enabled = isExportButtonEnabled,
         ) {
             Text(
-                text = "Export"
+                text = "Export",
             )
         }
     }

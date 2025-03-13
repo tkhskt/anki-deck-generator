@@ -1,0 +1,14 @@
+[*]
+indent_size=4
+insert_final_newline=true
+
+[*.{kt,kts}]
+ktlint_code_style=ktlint_official
+ktlint_function_naming_ignore_when_annotated_with=Composable
+ktlint_standard_function-signature=disabled
+ktlint_standard_multiline-if-else=disabled
+ktlint_standard_multiline-expression-wrapping=disabled
+ktlint_standard_function-expression-body = disabled
+
+[**/build/**/*.kt]
+ktlint=disabled

@@ -3,7 +3,6 @@ package com.tkhskt.ankideckgenerator.infra
 import com.tkhskt.ankideckgenerator.domain.Dictionary
 
 class DictionaryStub : Dictionary {
-
     override suspend fun find(query: Dictionary.Query): List<Dictionary.Entry> {
         return (0..4).map {
             Dictionary.Entry(
@@ -14,8 +13,8 @@ class DictionaryStub : Dictionary {
                 definition = "definition",
                 exampleSentence = Dictionary.Entry.ExampleSentence(
                     ja = "japanese sentence",
-                    en = "english sentence"
-                )
+                    en = "english sentence",
+                ),
             )
         }
     }
@@ -30,8 +29,8 @@ class DictionaryStub : Dictionary {
                 definition = "definition",
                 exampleSentence = Dictionary.Entry.ExampleSentence(
                     ja = "japanese sentence",
-                    en = "english sentence"
-                )
+                    en = "english sentence",
+                ),
             )
         }
     }

@@ -10,7 +10,6 @@ data class MainUiState(
     val partOfSpeeches: List<String>,
     val cards: List<CardState>?,
 ) {
-
     val numberOfCards = cards?.size ?: 0
 
     val isExportButtonEnabled = cards.isNullOrEmpty().not()
@@ -31,7 +30,7 @@ data class MainUiState(
             keyword = "",
             selectedPartOfSpeech = null,
             partOfSpeeches = emptyList(),
-            cards = null
+            cards = null,
         )
     }
 }

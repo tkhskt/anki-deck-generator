@@ -16,7 +16,7 @@ fun App() {
             dictionaryRepository = EijiroRepository("dictionary/eijiro.txt"),
             cardFactory = CardFactory(),
             deckRepository = DeckRepositoryImpl(cardSeparator = "\$break\$"),
-            csvLoader = CsvLoader()
+            csvLoader = CsvLoader(),
         )
     }
     AnkiDeckGeneratorTheme {

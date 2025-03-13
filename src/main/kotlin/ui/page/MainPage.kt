@@ -8,7 +8,7 @@ import com.tkhskt.ankideckgenerator.ui.template.MainScreen
 
 @Composable
 fun MainPage(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
 ) {
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -21,6 +21,6 @@ fun MainPage(
         onKeywordChange = { viewModel.changeKeyword(it) },
         onPartOfSpeechChange = { viewModel.changePartOfSpeech(it) },
         onInputFilePathSelect = { viewModel.searchByFile(it) },
-        onExportFilePathSelect = { viewModel.exportDeck(it) }
+        onExportFilePathSelect = { viewModel.exportDeck(it) },
     )
 }

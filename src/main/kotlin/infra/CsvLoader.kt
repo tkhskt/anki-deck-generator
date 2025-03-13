@@ -3,7 +3,6 @@ package com.tkhskt.ankideckgenerator.infra
 import java.io.File
 
 class CsvLoader {
-
     fun read(filePath: String): List<List<String>> {
         val file = File(filePath) // CSVファイルのパスを指定
         val result = mutableListOf<List<String>>()

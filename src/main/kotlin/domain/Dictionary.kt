@@ -1,7 +1,6 @@
 package com.tkhskt.ankideckgenerator.domain
 
 interface Dictionary {
-
     suspend fun find(query: Query): List<Entry>
 
     suspend fun findAll(queries: List<Query>): List<Entry>
@@ -20,7 +19,9 @@ interface Dictionary {
         )
     }
 
-    enum class PartOfSpeech(val value: String) {
+    enum class PartOfSpeech(
+        val value: String,
+    ) {
         NOUN("名"),
         VERB("動"),
         ADJECTIVE("形"),

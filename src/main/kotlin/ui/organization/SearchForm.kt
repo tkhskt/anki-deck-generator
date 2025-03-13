@@ -32,7 +32,7 @@ fun SearchForm(
         modifier = modifier,
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextField(
                 value = keyword,
@@ -40,13 +40,12 @@ fun SearchForm(
             )
             Button(
                 modifier = Modifier.padding(start = 24.dp),
-                onClick = onInputFileSelectorButtonClick
+                onClick = onInputFileSelectorButtonClick,
             ) {
                 Text(
-                    text = "Select File"
+                    text = "Select File",
                 )
             }
-
         }
         PartOfSpeechSelector(
             modifier = Modifier.padding(vertical = 12.dp),
@@ -76,20 +75,20 @@ private fun PartOfSpeechSelector(
         )
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             DropdownMenuItem(
                 onClick = {
                     expanded = false
                     onChange(null)
-                }
+                },
             ) {}
             options.forEach { option ->
                 DropdownMenuItem(
                     onClick = {
                         expanded = false
                         onChange(option)
-                    }
+                    },
                 ) {
                     Text(option)
                 }

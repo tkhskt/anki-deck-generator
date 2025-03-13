@@ -16,12 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tkhskt.ankideckgenerator.ui.page.MainUiState
 import com.tkhskt.ankideckgenerator.ui.organization.Card
 import com.tkhskt.ankideckgenerator.ui.organization.FileDialog
 import com.tkhskt.ankideckgenerator.ui.organization.Mode
 import com.tkhskt.ankideckgenerator.ui.organization.SearchForm
 import com.tkhskt.ankideckgenerator.ui.organization.SearchResultHeader
+import com.tkhskt.ankideckgenerator.ui.page.MainUiState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -32,11 +32,10 @@ fun MainScreen(
     onInputFilePathSelect: (filePath: String) -> Unit,
     onExportFilePathSelect: (filePath: String) -> Unit,
 ) {
-
     var isInputFileChooserOpen by remember { mutableStateOf(false) }
     if (isInputFileChooserOpen) {
         FileDialog(
-            mode = Mode.LOAD
+            mode = Mode.LOAD,
         ) { filePath ->
             isInputFileChooserOpen = false
             if (filePath != null) {
@@ -48,7 +47,7 @@ fun MainScreen(
     var isExportFilePathChooserOpen by remember { mutableStateOf(false) }
     if (isExportFilePathChooserOpen) {
         FileDialog(
-            mode = Mode.SAVE
+            mode = Mode.SAVE,
         ) { filePath ->
             isExportFilePathChooserOpen = false
             if (filePath != null) {
@@ -61,16 +60,16 @@ fun MainScreen(
         modifier = Modifier.padding(
             top = 24.dp,
             start = 24.dp,
-            end = 24.dp
+            end = 24.dp,
         ),
         contentPadding = PaddingValues(
-            bottom = 24.dp
+            bottom = 24.dp,
         ),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         stickyHeader {
             Surface(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column {
                     if (uiState.isDictionaryLoading) {
@@ -98,7 +97,7 @@ fun MainScreen(
             uiState.cards?.forEachIndexed { index, card ->
                 item(index) {
                     Card(
-                        state = card
+                        state = card,
                     )
                 }
             }

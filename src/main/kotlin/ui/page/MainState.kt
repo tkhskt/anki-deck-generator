@@ -11,7 +11,6 @@ data class MainState(
     val dictionary: Dictionary?,
     val searchResult: List<Card>?,
 ) {
-
     val partOfSpeeches = Dictionary.PartOfSpeech.entries
 
     companion object {
@@ -21,7 +20,7 @@ data class MainState(
             keyword = "",
             selectedPartOfSpeech = null,
             dictionary = null,
-            searchResult = null
+            searchResult = null,
         )
     }
 }

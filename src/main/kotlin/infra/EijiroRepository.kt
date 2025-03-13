@@ -6,7 +6,7 @@ import com.tkhskt.ankideckgenerator.domain.DictionaryRepository
 import java.io.InputStream
 
 class EijiroRepository(
-    private val filePath: String
+    private val filePath: String,
 ) : DictionaryRepository {
     private var chunkedEntries: List<Sequence<Entry>> = emptyList()
 
@@ -51,7 +51,7 @@ class EijiroRepository(
             word = keyword,
             partOfSpeech = partOfSpeech,
             definition = definition.split("■・").first(),
-            exampleSentence = extractExampleSentence(definition)
+            exampleSentence = extractExampleSentence(definition),
         )
     }
 
@@ -68,7 +68,7 @@ class EijiroRepository(
             val japanese = sentence.substring(splitIndex).trim()
             Entry.ExampleSentence(
                 en = english,
-                ja = japanese
+                ja = japanese,
             )
         } else {
             null

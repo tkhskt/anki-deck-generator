@@ -11,11 +11,10 @@ fun FileDialog(
     title: String = "Choose a file",
     mode: Mode,
     outputFile: String? = "deck.md",
-    onCloseRequest: (filePath: String?) -> Unit
+    onCloseRequest: (filePath: String?) -> Unit,
 ) = AwtWindow(
     create = {
         object : FileDialog(parent, title, mode.value) {
-
             init {
                 if (mode == Mode.SAVE) {
                     outputFile?.let { setFile(outputFile) }
@@ -30,10 +29,12 @@ fun FileDialog(
             }
         }
     },
-    dispose = FileDialog::dispose
+    dispose = FileDialog::dispose,
 )
 
-enum class Mode(val value: Int) {
+enum class Mode(
+    val value: Int,
+) {
     LOAD(FileDialog.LOAD),
-    SAVE(FileDialog.SAVE)
+    SAVE(FileDialog.SAVE),
 }

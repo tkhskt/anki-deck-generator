@@ -28,7 +28,7 @@ import com.tkhskt.ankideckgenerator.ui.AnkiDeckGeneratorTheme
 
 data class CardState(
     val front: String,
-    val back: String
+    val back: String,
 )
 
 @Composable
@@ -39,20 +39,20 @@ fun Card(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(1.dp, Color.Gray)
+        border = BorderStroke(1.dp, Color.Gray),
     ) {
         SelectionContainer {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             ) {
                 Half(
                     modifier = Modifier.padding(bottom = 12.dp),
-                    value = state.front
+                    value = state.front,
                 )
                 Divider(modifier = Modifier.fillMaxWidth())
                 Half(
                     modifier = Modifier.padding(top = 12.dp),
-                    value = state.back
+                    value = state.back,
                 )
             }
         }
@@ -66,15 +66,15 @@ private fun Half(
 ) {
     val clipboard = LocalClipboardManager.current
     Box(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         Text(
             modifier = Modifier.padding(bottom = 12.dp),
-            text = value
+            text = value,
         )
         CopyIcon(
             modifier = Modifier.align(Alignment.TopEnd),
-            onClick = { clipboard.setText(AnnotatedString(value)) }
+            onClick = { clipboard.setText(AnnotatedString(value)) },
         )
     }
 }
@@ -82,7 +82,7 @@ private fun Half(
 @Composable
 private fun CopyIcon(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
@@ -91,7 +91,7 @@ private fun CopyIcon(
             .padding(4.dp)
             .width(20.dp)
             .height(14.dp)
-            .alpha(0.7f)
+            .alpha(0.7f),
     ) {
         Box(
             modifier = Modifier
@@ -99,7 +99,7 @@ private fun CopyIcon(
                 .width(16.dp)
                 .height(10.dp)
                 .border(2.dp, Color.Gray)
-                .align(Alignment.TopStart)
+                .align(Alignment.TopStart),
         )
         Box(
             modifier = Modifier
@@ -107,7 +107,7 @@ private fun CopyIcon(
                 .width(16.dp)
                 .height(10.dp)
                 .border(2.dp, Color.Gray)
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomEnd),
         )
     }
 }

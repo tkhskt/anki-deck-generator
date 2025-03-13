@@ -12,7 +12,6 @@ import kotlinx.coroutines.sync.withLock
 class Eijiro(
     private val chunkedEntries: List<Sequence<Entry>>,
 ) : Dictionary {
-
     override suspend fun find(query: Dictionary.Query): List<Entry> {
         return findAll(listOf(query))
     }
@@ -28,22 +27,24 @@ class Eijiro(
                 }
             }
         }
-        return entriesMap.map { (_, entries) ->
-            entries
-                .sortById()
-                .mergeSameWordEntries(pronunciation = extractPronunciation(entries))
-                .filterNotPronunciationEntry()
-        }.flatten()
+        return entriesMap
+            .map { (_, entries) ->
+                entries
+                    .sortById()
+                    .mergeSameWordEntries(pronunciation = extractPronunciation(entries))
+                    .filterNotPronunciationEntry()
+            }.flatten()
     }
 
     private suspend fun search(action: suspend (Entry, Mutex) -> Unit) {
         val mutex = Mutex()
         coroutineScope {
-            chunkedEntries.map { entries ->
-                async(Dispatchers.Default) {
-                    entries.forEach { action(it, mutex) }
-                }
-            }.awaitAll()
+            chunkedEntries
+                .map { entries ->
+                    async(Dispatchers.Default) {
+                        entries.forEach { action(it, mutex) }
+                    }
+                }.awaitAll()
         }
     }
 
@@ -74,12 +75,13 @@ class Eijiro(
                 word = groupedEntries.first().word, // 先頭の `word` を採用
                 partOfSpeech = key,
                 pronunciation = pronunciation,
-                definition = groupedEntries.mapIndexed { index, value ->
-                    value.copy(
-                        definition = "${index + 1}. ${value.definition}"
-                    )
-                }.joinToString("\n") { it.definition },
-                exampleSentence = groupedEntries.firstOrNull { it.exampleSentence != null }?.exampleSentence
+                definition = groupedEntries
+                    .mapIndexed { index, value ->
+                        value.copy(
+                            definition = "${index + 1}. ${value.definition}",
+                        )
+                    }.joinToString("\n") { it.definition },
+                exampleSentence = groupedEntries.firstOrNull { it.exampleSentence != null }?.exampleSentence,
             )
         }
     }
