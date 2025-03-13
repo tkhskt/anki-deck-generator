@@ -8,8 +8,6 @@ import java.io.InputStream
 class EijiroRepository(
     private val filePath: String,
 ) : DictionaryRepository {
-    private var chunkedEntries: List<Sequence<Entry>> = emptyList()
-
     override fun get(): Dictionary {
         println("Dictionary Loading...")
         val stream = openFile() ?: throw IllegalArgumentException("File not found: $filePath")
@@ -20,7 +18,7 @@ class EijiroRepository(
             }
         }
         val numberOfSplits = entries.size / 10
-        chunkedEntries = entries.chunked(numberOfSplits).map {
+        val chunkedEntries = entries.chunked(numberOfSplits).map {
             it.asSequence()
         }
         println("Loading Complete")
