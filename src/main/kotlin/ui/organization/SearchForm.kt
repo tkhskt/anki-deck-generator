@@ -43,7 +43,7 @@ fun SearchForm(
                 onClick = onInputFileSelectorButtonClick,
             ) {
                 Text(
-                    text = "Select File",
+                    text = "Import File",
                 )
             }
         }

@@ -29,7 +29,7 @@ fun SearchResultHeader(
             enabled = isExportButtonEnabled,
         ) {
             Text(
-                text = "Export",
+                text = "Export Deck",
             )
         }
     }
