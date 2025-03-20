@@ -30,7 +30,7 @@ class CardFactory {
 
     private fun parseEnglishExampleSentence(exampleSentence: String?): String {
         return exampleSentence?.let {
-            "\n\n$exampleSentence"
+            "\n\n\n$exampleSentence"
         } ?: ""
     }
 
